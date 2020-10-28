@@ -19,4 +19,9 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
+    install_requires=[
+        'requests>=2.24.0'
+        'astropy>=4.0.1'
+        'pandas>=1.0.5'
+    ]
 )
