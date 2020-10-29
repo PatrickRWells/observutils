@@ -13,19 +13,19 @@ def sext2reg(infile, outfile, outformat="radec", dolabel=False, color='green', o
     color (optional): Color for markings in ds9, default green
     overwrite (optional): Whether to allow code to overwrite the output file if it already
         exists. Defaults to False
-    
+
     """
-    
+
     try:
         data = ascii.read(infile)
     except:
         print("Error: Could not read input file")
         return
-    
+
     if os.path.exists(outfile) and not overwrite:
         print("Error: Specificed output file already exists")
         return
-    
+
     with open(outfile, 'w') as output:
         output.write('global color={}\n'.format(color))
         if outformat=="radec":
@@ -38,14 +38,14 @@ def sext2reg(infile, outfile, outformat="radec", dolabel=False, color='green', o
             print("Error: Invalid output format specified")
             print("Supported output types are \"radec\" and \"pix\" ")
             return
-        
+
         col_names = data.colnames
         for key in keys:
             if key not in col_names:
                 print("Error, input format {} specifed but"\
                       " data does not contain necessary information".format(outformat))
                 return
-        
+
         keys_common = ['A_WORLD', 'B_WORLD', 'THETA_J2000']
         for line in data:
             rfac = line['KRON_RADIUS'] / 3600 / 20
@@ -54,4 +54,3 @@ def sext2reg(infile, outfile, outformat="radec", dolabel=False, color='green', o
             vals_common = [line[key] * common_factors[index] for index,key in enumerate(keys_common)]
             vals_un.extend(vals_common)
             output.write(template.format(*vals_un))
-                

@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+
+from observutils.dataprocess import sextractor
+import sys
+import argparse
+"""
+usage:
+sext2reg outfile infile
+"""
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Convert sextractor output to DS9 region file.')
+    parser.add_argument("infile", help="Input sextractor file", type=str)
+    parser.add_argument("outfile", help="Output region file", type=str)
+    parser.add_argument("-f", "--format", help="Output format. Defaults to radec",
+                        type=str, choices=['radec', 'pix'])
+    args = parser.parse_args()
+    if args.format is not None:
+        sextractor.sext2reg(args.infile, args.outfile, args.format)
+    else:
+        sextractor.sext2reg(args.infile, args.outfile)

@@ -23,5 +23,6 @@ setuptools.setup(
         'requests>=2.24.0'
         'astropy>=4.0.1'
         'pandas>=1.0.5'
-    ]
+    ],
+    scripts=['bin/sext2reg']
 )
