@@ -1,7 +1,7 @@
 from observutils.datacollect.catalog import catalog
 import requests
 from astropy.table import Table
-from pandas import DataFrame
+import numpy as np
 
 class panstarrsClient(catalog):
     """
@@ -104,17 +104,28 @@ class panstarrsClient(catalog):
             print(r.url)
         r.raise_for_status()
         if format == "json":
-            output = self.parseReturn(r.json())
+            output = self.parseReturn(r.json(), **kwargs)
             return output
         else:
             return r.text
     
 
-    def parseReturn(self, data, dtype='json'):
+    def parseReturn(self, data, dtype='json', outformat='astropy', **kwargs):
         obj_data = data['data']
         col_names = [item['name'] for item in data['info']]
-        obj_frame = DataFrame(data=obj_data, columns=col_names)
-        info_frame = DataFrame.from_dict(data['info'])
+        if outformat == 'pandas':
+            from pandas import DataFrame
+            obj_frame = DataFrame(data=obj_data, columns=col_names)
+            info_frame = DataFrame.from_dict(data['info'])
+        
+        elif outformat == 'astropy':
+            obj_frame = Table(data=np.array(obj_data), names=col_names)
+            info_frame = Table(data['info'])
+
+        else:
+            print('Error: Unknown format for data output')
+            exit()
+
         return (obj_frame, info_frame)
 
     def checkvalid(self, table,release):
