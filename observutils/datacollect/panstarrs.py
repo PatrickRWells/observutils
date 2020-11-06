@@ -121,7 +121,7 @@ class panstarrsClient(catalog):
         meta_col = [item['name'] for item in  data['info']]
         if outformat == 'pandas':
             from pandas import DataFrame
-            obj_frame = DataFrame(data=obj_data, columns=col_names)
+            obj_frame = DataFrame(data=obj_data, columns=data_col)
             info_frame = DataFrame.from_dict(data['info'])
         
         elif (outformat == 'astropy'):
@@ -177,5 +177,5 @@ class panstarrsClient(catalog):
 
 if __name__ == '__main__':
     client = panstarrsClient()
-    data = client.regionSearch(ra=13.4349, dec=-20.2091, radius=10., r_unit='min')
+    data, metadata = client.regionSearch(ra=13.4349, dec=-20.2091, radius=10., r_unit='min', outformat='pandas')
     print(type(data))
