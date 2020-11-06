@@ -1,4 +1,6 @@
 from observutils.datacollect.catalog import catalog
+from observutils import ASTROPY_VERSION
+from packaging import version
 import requests
 from astropy.table import Table
 import numpy as np
@@ -13,7 +15,7 @@ class panstarrsClient(catalog):
     def __init__(self):
         super().__init__(url='https://catalogs.mast.stsci.edu/api/v0.1/panstarrs')
     
-    def regionSearch(self, ra, dec, radius, r_unit = 'sec', table="mean",release="dr2",format="json",columns=None,
+    def regionSearch(self, ra, dec, radius, unit = 'min', table="mean",release="dr2",format="json",columns=None,
             verbose=False, **kwargs):
         """Do a search in a region
         
@@ -31,29 +33,30 @@ class panstarrsClient(catalog):
         verbose: print info about request
         **kw: other parameters (e.g., 'nDetections.min':2)
         """
-        
+        if 'r_unit' in kwargs.keys():
+            unit = kwargs['r_unit']
         data = kwargs.copy()
         data['ra'] = ra
         data['dec'] = dec
-        data['radius'] = self.parseRadius(radius, r_unit)
+        data['radius'] = self.parseRadius(radius, unit)
         return self.search(table=table,release=release,format=format,columns=columns,
                         verbose=verbose, **data)
 
-    def parseRadius(self, radius, r_unit='sec'):
-
-        if r_unit not in ('deg', 'min', 'sec'):
+    def parseRadius(self, radius, unit='sec'):
+        if unit not in ('deg', 'min', 'sec'):
             print("Error in search: Units of radius must be one of"\
                 " deg, min, sec")
+            return
 
-        if r_unit == 'deg':
+        if unit == 'deg':
             print("Searching in radius of {} degrees".format(radius))
             rad_parse = radius
         
         else:
             rad_parse = radius/60.0
-            if r_unit == 'sec':
+            if unit == 'sec':
                 rad_parse /= 60.0
-        print('Searching in radius of {} {} = {} degrees'.format(radius, r_unit, round(rad_parse, 5)))
+        print('Searching in radius of {} {} = {} degrees'.format(radius, unit, round(rad_parse, 5)))
 
         return rad_parse
        
@@ -98,6 +101,7 @@ class panstarrsClient(catalog):
             data['columns'] = '[{}]'.format(','.join(columns))
 
         # either get or post works
+        print("Querying database...")
         r = requests.get(url, params=data)
 
         if verbose:
@@ -112,16 +116,17 @@ class panstarrsClient(catalog):
 
     def parseReturn(self, data, dtype='json', outformat='astropy', **kwargs):
         obj_data = data['data']
-        col_names = [item['name'] for item in data['info']]
+        data_col = [item['name'] for item in data['info']]
+        meta_data = data['info']
+        meta_col = [item['name'] for item in  data['info']]
         if outformat == 'pandas':
             from pandas import DataFrame
             obj_frame = DataFrame(data=obj_data, columns=col_names)
             info_frame = DataFrame.from_dict(data['info'])
         
-        elif outformat == 'astropy':
-            obj_frame = Table(data=np.array(obj_data), names=col_names)
-            info_frame = Table(data['info'])
-
+        elif (outformat == 'astropy'):
+            obj_frame = Table(data=np.array(obj_data), names=data_col)
+            info_frame = Table(data=np.array(meta_data), names=meta_col)
         else:
             print('Error: Unknown format for data output')
             exit()
@@ -172,5 +177,5 @@ class panstarrsClient(catalog):
 
 if __name__ == '__main__':
     client = panstarrsClient()
-    data = client.regionSearch(ra=13.4349, dec=-20.2091, radius=5)
+    data = client.regionSearch(ra=13.4349, dec=-20.2091, radius=10., r_unit='min')
     print(type(data))
