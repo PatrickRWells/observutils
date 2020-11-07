@@ -25,7 +25,7 @@ class catalogData:
         Writes the catalog data to a file to be used later.
         ---------------
         params:
-        fname: string, output file name
+        fname: string, output file nameo
         format: output format, currently only pickle is supported
         
         """

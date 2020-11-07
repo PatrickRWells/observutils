@@ -5,7 +5,13 @@ import requests
 from astropy.table import Table
 import numpy as np
 
-class panstarrsClient(catalog):
+
+class panstarrsClient:
+    def __init__(self):
+        print("Class panstarrs.panstarrsClient has been renamed to panstarrs.client")
+        del(self)
+
+class client(catalog):
     """
     Client for communicating with the Panstarrs catalog
     Much of this code is originally borrowed from a
