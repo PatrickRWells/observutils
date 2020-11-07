@@ -1,4 +1,4 @@
-from observutils.datacollect.catalog import catalog
+from observutils.datacollect.catalog import catalog, catalogData
 from observutils import ASTROPY_VERSION
 from packaging import version
 import requests
@@ -131,7 +131,7 @@ class panstarrsClient(catalog):
             print('Error: Unknown format for data output')
             exit()
 
-        return (obj_frame, info_frame)
+        return catalogData(obj_frame, info_frame)
 
     def checkvalid(self, table,release):
         """Checks if this combination of table and release is acceptable
@@ -172,7 +172,7 @@ class panstarrsClient(catalog):
                 names=('name','type','description'))
         return tab
 
-            
+
 
 
 if __name__ == '__main__':
