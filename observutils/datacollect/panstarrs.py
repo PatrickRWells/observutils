@@ -131,22 +131,13 @@ class client(catalog):
             info_frame = DataFrame.from_dict(data['info'])
         
         elif (outformat == 'astropy'):
-            outdata = np.array(obj_data)
-            newdat = []
-            for sub in outdata: 
-                newsub = []
-                for item in sub:
-                    try:
-                        newitem = float(item)
-                        newsub.append(newitem)
-                    except:
-                        newsub.append(item)
-                newdat.append(newsub)
-            obj_frame = Table(data=np.array(newdat), names=data_col)
+            obj_frame = Table(data=np.array(obj_data), names=data_col)
             info_frame = Table(data=np.array(meta_data), names=meta_col)
-        else:
-            print('Error: Unknown format for data output')
-            exit()
+            for column in obj_frame.colnames:
+                try:
+                    obj_frame[column] = obj_frame[column].astype(float)
+                except:
+                    pass
 
         return catalogData(obj_frame, info_frame)
 
@@ -194,5 +185,5 @@ class client(catalog):
 
 if __name__ == '__main__':
     client = client()
-    data = client.regionSearch(ra=13.4349, dec=-20.2091, radius=10., r_unit='sec', outformat='pandas')
-    print(data.data)
+    data = client.regionSearch(ra=13.4349, dec=-20.2091, radius=10., r_unit='sec', outformat='astropy')
+    print(data.data.info)
