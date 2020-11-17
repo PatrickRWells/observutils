@@ -37,18 +37,23 @@ class catalogData:
             if outformat == 'pickle':
                 import pickle
                 pickle.dump(self, open(fname, 'wb'))
+
             if outformat == 'fits':
+                hdus = []
+                primary = fits.PrimaryHDU()
+                primary.header['OBUTILS'] = True
+                primary.header['META'] = savemeta
+                primary.header['FORMAT'] = self.format
+                hdus.append(primary)    
                 if self.format == 'astropy':
-                    if fname.endswith('fits'):
-                        self.data.write(fname)
-                    else:
-                        self.data.write('.'.join([fname, 'fits']))
-                elif self.format == 'pandas':
-                    fits_data = Table.from_pandas(self.data)
-                    if fname.endswith('fits'):
-                        self.data.write(fname)
-                    else:
-                        self.data.write('.'.join([fname, '.fits']))
+                    data_hdu = fits.table_to_hdu(self.data)
+                    hdus.append(data_hdu)
+            
+                output = fits.HDUList(hdus)
+                if fname.endswith('fits'):
+                    output.writeto(fname)
+                else:
+                    output.writeto('.'.join([fname, 'fits']))
 
 
 
@@ -66,7 +71,12 @@ def openCatalogData(fname, **kwargs):
 
     if fname.endswith('.fits'):
         raw_data = fits.open(fname)
+        try:
+            isCatalogData = raw_data[0].header['OBUTILS']
+        except:
+            print("Error: file does not contain catalog data")
         data = catalogData(Table(raw_data[1].data), None, 'astropy')
+
     else:
         try:
             import pickle
